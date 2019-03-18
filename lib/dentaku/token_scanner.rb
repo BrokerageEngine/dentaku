@@ -2,6 +2,7 @@ require 'bigdecimal'
 require 'time'
 require 'dentaku/string_casing'
 require 'dentaku/token'
+require 'money'
 
 module Dentaku
   class TokenScanner
@@ -35,6 +36,7 @@ module Dentaku
           :null,
           :whitespace,
           :datetime, # before numeric so it can pick up timestamps
+          :money, #before numeric so it can be changed as a unit
           :numeric,
           :hexadecimal,
           :double_quoted_string,
@@ -91,7 +93,16 @@ module Dentaku
 
       def numeric
         new(:numeric, '((?:\d+(\.\d+)?|\.\d+)(?:(e|E)(\+|-)?\d+)?)\b', lambda { |raw|
-          raw =~ /\./ ? BigDecimal(raw) : raw.to_i
+          raw =~ /\./ ? BigDecimal.new(raw) : raw.to_i
+        })
+      end
+
+      def money
+        money_match  = '((\$\s*(\.\d+|\d+\.\d+|\d+)))\b'
+        new(:money,  money_match, lambda { |raw|
+          regexp    = %r{\A(#{ money_match })}i
+           money_digits = regexp.match(raw).to_a.last
+          raw =~ /\./ ? Money.new(BigDecimal.new(money_digits) * 100) : Money.new(money_digits.to_i * 100)
         })
       end
 

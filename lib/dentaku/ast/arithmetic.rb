@@ -9,12 +9,12 @@ module Dentaku
         super
 
         unless valid_left?
-          raise NodeError.new(:numeric, left.type, :left),
-                "#{self.class} requires numeric operands"
+          raise NodeError.new(%i[numeric money], left.type, :left),
+                "#{self.class} requires numeric or money operands"
         end
         unless valid_right?
-          raise NodeError.new(:numeric, right.type, :right),
-                "#{self.class} requires numeric operands"
+          raise NodeError.new(%i[numeric money], right.type, :right),
+                "#{self.class} requires numeric or money operands"
         end
       end
 
@@ -40,7 +40,8 @@ module Dentaku
       end
 
       def numeric(val, prefer_integer)
-        v = BigDecimal(val, Float::DIG + 1)
+        return val if val.class == Money
+        v = BigDecimal.new(val, Float::DIG + 1)
         v = v.to_i if prefer_integer && v.frac.zero?
         v
       rescue ::TypeError
@@ -50,7 +51,7 @@ module Dentaku
       end
 
       def valid_node?(node)
-        node && (node.dependencies.any? || node.type == :numeric)
+        node && (node.dependencies.any? || node.type == :numeric || node.type == :money)
       end
 
       def valid_left?
@@ -92,6 +93,11 @@ module Dentaku
       def self.precedence
         10
       end
+      def valid_left?
+        valid_node?(left) && (left.type != :money || (left.type == :money && left.type == right.type ))
+      end
+
+
     end
 
     class Subtraction < Arithmetic
@@ -102,9 +108,13 @@ module Dentaku
       def self.precedence
         10
       end
+      def valid_left?
+        valid_node?(left) && (left.type != :money || (left.type == :money && left.type == right.type ))
+      end
     end
 
     class Multiplication < Arithmetic
+
       def operator
         :*
       end
@@ -112,6 +122,12 @@ module Dentaku
       def self.precedence
         20
       end
+      def valid_left?
+      valid_node?(left) && left.type == :money && right.type != :money
+      end
+
+
+
     end
 
     class Division < Arithmetic
@@ -124,6 +140,9 @@ module Dentaku
         raise Dentaku::ZeroDivisionError if r.zero?
 
         cast(cast(left.value(context)) / r)
+      end
+      def valid_left?
+        valid_node?(left) && left.type == :money && right.type != :money
       end
 
       def self.precedence
@@ -188,13 +207,21 @@ module Dentaku
       end
 
       def valid_left?
-        valid_node?(left) || left.nil?
+        (valid_node?(left) && left.type != :money) || left.nil?
       end
+
+
     end
 
     class Exponentiation < Arithmetic
       def operator
         :**
+      end
+      def valid_left?
+        valid_node?(left)   && left.type != :money
+      end
+      def valid_right?
+        valid_node?(right)  && right.type != :money
       end
 
       def self.precedence

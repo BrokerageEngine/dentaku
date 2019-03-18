@@ -62,6 +62,8 @@ module Dentaku
 
         when :numeric
           output.push AST::Numeric.new(token)
+        when :money
+          output.push AST::Money.new(token)
 
         when :logical
           output.push AST::Logical.new(token)

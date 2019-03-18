@@ -92,6 +92,7 @@ module Dentaku
 
         tokens = tokenizer.tokenize(expression, options)
         Parser.new(tokens, options).parse.tap do |node|
+
           @ast_cache[expression] = node if cache_ast?
         end
       }
