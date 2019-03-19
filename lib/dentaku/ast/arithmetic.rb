@@ -122,10 +122,6 @@ module Dentaku
       def self.precedence
         20
       end
-      def valid_left?
-      valid_node?(left) && left.type == :money && right.type != :money
-      end
-
 
 
     end
@@ -140,9 +136,6 @@ module Dentaku
         raise Dentaku::ZeroDivisionError if r.zero?
 
         cast(cast(left.value(context)) / r)
-      end
-      def valid_left?
-        valid_node?(left) && left.type == :money && right.type != :money
       end
 
       def self.precedence
