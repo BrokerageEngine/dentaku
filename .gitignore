@@ -9,6 +9,6 @@ vendor/*
 /.ruby-gemset
 /.ruby-version
 /.rspec
-
+.idea
 .byebug_history
 coverage
