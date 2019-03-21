@@ -123,7 +123,6 @@ module Dentaku
         20
       end
 
-
     end
 
     class Division < Arithmetic
