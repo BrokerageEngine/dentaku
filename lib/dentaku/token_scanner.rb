@@ -98,10 +98,10 @@ module Dentaku
       end
 
       def money
-        money_match  = '((\$\s*(\.\d+|\d+\.\d+|\d+)))\b'
+        money_match  = '((\$\s*([-]?\s*\.\d+|[-]?\s*\d+\.\d+|[-]?\s*\d+)))\b'
         new(:money,  money_match, lambda { |raw|
           regexp    = %r{\A(#{ money_match })}i
-           money_digits = regexp.match(raw).to_a.last
+           money_digits = regexp.match(raw).to_a.last.gsub(" ","")
           raw =~ /\./ ? Money.new(BigDecimal.new(money_digits) * 100) : Money.new(money_digits.to_i * 100)
         })
       end
