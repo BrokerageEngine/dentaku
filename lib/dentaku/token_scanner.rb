@@ -93,7 +93,7 @@ module Dentaku
 
       def numeric
         new(:numeric, '((?:\d+(\.\d+)?|\.\d+)(?:(e|E)(\+|-)?\d+)?)\b', lambda { |raw|
-          raw =~ /\./ ? BigDecimal.new(raw) : raw.to_i
+          raw =~ /\./ ? BigDecimal(raw) : raw.to_i
         })
       end
 
@@ -102,7 +102,7 @@ module Dentaku
         new(:money,  money_match, lambda { |raw|
           regexp    = %r{\A(#{ money_match })}i
            money_digits = regexp.match(raw).to_a.last.gsub(" ","")
-          raw =~ /\./ ? Money.new(BigDecimal.new(money_digits) * 100) : Money.new(money_digits.to_i * 100)
+          raw =~ /\./ ? Money.new(BigDecimal(money_digits) * 100) : Money.new(money_digits.to_i * 100)
         })
       end
 
